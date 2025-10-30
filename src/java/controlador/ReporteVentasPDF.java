@@ -7,14 +7,14 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-import modelo.Venta;
-import modelo.VentaDAO;
+import utils.ConexionDB;
 
 @WebServlet("/ReporteVentasPDF")
 public class ReporteVentasPDF extends HttpServlet {
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -22,25 +22,21 @@ public class ReporteVentasPDF extends HttpServlet {
         String fechaInicio = request.getParameter("fechaInicio");
         String fechaFin = request.getParameter("fechaFin");
 
-        // ✅ Obtener lista de ventas
-        List<Venta> ventas = VentaDAO.obtenerVentas(fechaInicio, fechaFin, null, null);
-
-        // ✅ Configurar PDF
+        // Configurar PDF
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "inline; filename=reporte_ventas.pdf");
 
         try (OutputStream out = response.getOutputStream()) {
-            Document doc = new Document(PageSize.A4);
+            Document doc = new Document(PageSize.A4.rotate()); // horizontal
             PdfWriter.getInstance(doc, out);
             doc.open();
 
             // 🧾 Encabezado
             Font tituloFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
             Font headerFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
-            Font bodyFont = new Font(Font.FontFamily.HELVETICA, 11);
-            Font totalFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLDITALIC);
+            Font bodyFont = new Font(Font.FontFamily.HELVETICA, 10);
 
-            Paragraph titulo = new Paragraph("Reporte de Ventas", tituloFont);
+            Paragraph titulo = new Paragraph("📊 Reporte de Ventas", tituloFont);
             titulo.setAlignment(Element.ALIGN_CENTER);
             titulo.setSpacingAfter(10);
             doc.add(titulo);
@@ -51,34 +47,68 @@ public class ReporteVentasPDF extends HttpServlet {
             fecha.setSpacingAfter(15);
             doc.add(fecha);
 
-            // 📋 Tabla
-            PdfPTable tabla = new PdfPTable(4);
+            // 📋 Tabla PDF
+            PdfPTable tabla = new PdfPTable(6);
             tabla.setWidthPercentage(100);
-            tabla.setWidths(new float[]{3, 2, 3, 2});
+            tabla.setWidths(new float[]{2, 2, 3, 4, 2, 2});
 
+            tabla.addCell(new PdfPCell(new Phrase("ID Venta", headerFont)));
             tabla.addCell(new PdfPCell(new Phrase("No. Factura", headerFont)));
             tabla.addCell(new PdfPCell(new Phrase("Serie", headerFont)));
+            tabla.addCell(new PdfPCell(new Phrase("Cliente", headerFont)));
             tabla.addCell(new PdfPCell(new Phrase("Fecha Venta", headerFont)));
             tabla.addCell(new PdfPCell(new Phrase("Total (Q)", headerFont)));
 
-            double totalGeneral = 0;
-            for (Venta v : ventas) {
-                tabla.addCell(new PdfPCell(new Phrase(v.getNo_factura(), bodyFont)));
-                tabla.addCell(new PdfPCell(new Phrase(v.getSerie(), bodyFont)));
-                tabla.addCell(new PdfPCell(new Phrase(String.valueOf(v.getFecha_venta()), bodyFont)));
-                tabla.addCell(new PdfPCell(new Phrase(String.format("%.2f", v.getTotal()), bodyFont)));
-                totalGeneral += v.getTotal();
+            // ✅ Consulta SQL directa
+            StringBuilder sql = new StringBuilder();
+            sql.append("SELECT v.id_venta, v.no_factura, v.serie, c.nombres AS cliente, ")
+               .append("v.fecha_venta, v.total ")
+               .append("FROM ventas v INNER JOIN clientes c ON v.id_cliente = c.id_cliente WHERE 1=1 ");
+
+            if (fechaInicio != null && !fechaInicio.isEmpty() && fechaFin != null && !fechaFin.isEmpty()) {
+                sql.append("AND DATE(v.fecha_venta) BETWEEN ? AND ? ");
             }
 
-            doc.add(tabla);
+            sql.append("ORDER BY v.fecha_venta DESC");
 
-            // 💰 Total general
-            Paragraph total = new Paragraph("\nTotal General: Q" + String.format("%.2f", totalGeneral), totalFont);
-            total.setAlignment(Element.ALIGN_RIGHT);
-            total.setSpacingBefore(15);
-            doc.add(total);
+            try (Connection con = new ConexionDB().getConexion();
+                 PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+                int index = 1;
+                if (fechaInicio != null && !fechaInicio.isEmpty() && fechaFin != null && !fechaFin.isEmpty()) {
+                    ps.setString(index++, fechaInicio);
+                    ps.setString(index++, fechaFin);
+                }
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    boolean hayDatos = false;
+                    while (rs.next()) {
+                        hayDatos = true;
+                        tabla.addCell(new PdfPCell(new Phrase(String.valueOf(rs.getInt("id_venta")), bodyFont)));
+                        tabla.addCell(new PdfPCell(new Phrase(String.valueOf(rs.getInt("no_factura")), bodyFont)));
+                        tabla.addCell(new PdfPCell(new Phrase(rs.getString("serie"), bodyFont)));
+                        tabla.addCell(new PdfPCell(new Phrase(rs.getString("cliente"), bodyFont)));
+                        tabla.addCell(new PdfPCell(new Phrase(rs.getString("fecha_venta"), bodyFont)));
+                        tabla.addCell(new PdfPCell(new Phrase(String.format("Q %.2f", rs.getDouble("total")), bodyFont)));
+                    }
+
+                    if (!hayDatos) {
+                        Paragraph vacio = new Paragraph("\n⚠️ No hay datos disponibles para mostrar.", bodyFont);
+                        vacio.setAlignment(Element.ALIGN_CENTER);
+                        doc.add(vacio);
+                    } else {
+                        doc.add(tabla);
+                    }
+                }
+
+            } catch (SQLException e) {
+                Paragraph error = new Paragraph("❌ Error SQL: " + e.getMessage(), bodyFont);
+                error.setAlignment(Element.ALIGN_CENTER);
+                doc.add(error);
+            }
 
             doc.close();
+
         } catch (DocumentException e) {
             throw new IOException("Error al generar el PDF: " + e.getMessage());
         }

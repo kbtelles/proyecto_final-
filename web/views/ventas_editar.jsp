@@ -63,11 +63,11 @@
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <label class="form-label">Dirección</label>
+                        <label class="form-label">Direccion</label>
                         <input type="text" class="form-control form-control-sm" value="<%= rsVenta.getString("direccion") %>" readonly>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Teléfono</label>
+                        <label class="form-label">Telefono</label>
                         <input type="text" class="form-control form-control-sm" value="<%= rsVenta.getString("telefono") %>" readonly>
                     </div>
                 </div>
@@ -104,7 +104,7 @@
                             <th>Precio (Q)</th>
                             <th>Cantidad</th>
                             <th>Subtotal</th>
-                            <th>Acción</th>
+                            <th>Acci?n</th>
                         </tr>
                     </thead>
                     <tbody id="detalleBody">
@@ -118,8 +118,10 @@
                             while (rsd.next()) {
                                 total += rsd.getDouble("subtotal");
                         %>
+                        
                         <tr>
                             <td>
+                                
                                 <select class="form-select form-select-sm" name="idProducto" onchange="actualizarPrecio(this)" required>
                                     <%
                                         int idProdSel = rsd.getInt("id_producto");
@@ -140,6 +142,7 @@
                                     %>
                                 </select>
                             </td>
+                            
                             <td><input type="number" name="precio" value="<%= rsd.getDouble("precio_venta") %>" class="form-control form-control-sm precio" readonly></td>
                             <td>
                                 <input type="number" name="cantidad" value="<%= rsd.getInt("cantidad") %>"
@@ -168,6 +171,9 @@
                 </div>
 
                 <div class="text-end mt-4">
+                    <a href="${pageContext.request.contextPath}/FacturaPDF?idVenta=${param.idVenta}"
+   target="_blank" class="btn btn-danger">
+    <i class="bi bi-file-earmark-pdf"></i> Generar Factura PDF</a>
                     <button type="submit" class="btn btn-warning btn-lg">
                         <i class="bi bi-save"></i> Actualizar Venta
                     </button>
