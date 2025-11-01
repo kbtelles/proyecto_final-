@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\alexh\\Desktop\\Sistema1\\Sistema\\ApiAuthJWT\\ApiAuthJWT.csproj": {}
+    "C:\\Users\\J\\Desktop\\Repo_foinal\\proyecto_final-\\ApiAuthJWT\\ApiAuthJWT.csproj": {}
   },
   "projects": {
-    "C:\\Users\\alexh\\Desktop\\Sistema1\\Sistema\\ApiAuthJWT\\ApiAuthJWT.csproj": {
+    "C:\\Users\\J\\Desktop\\Repo_foinal\\proyecto_final-\\ApiAuthJWT\\ApiAuthJWT.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\alexh\\Desktop\\Sistema1\\Sistema\\ApiAuthJWT\\ApiAuthJWT.csproj",
+        "projectUniqueName": "C:\\Users\\J\\Desktop\\Repo_foinal\\proyecto_final-\\ApiAuthJWT\\ApiAuthJWT.csproj",
         "projectName": "ApiAuthJWT",
-        "projectPath": "C:\\Users\\alexh\\Desktop\\Sistema1\\Sistema\\ApiAuthJWT\\ApiAuthJWT.csproj",
-        "packagesPath": "C:\\Users\\alexh\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\alexh\\Desktop\\Sistema1\\Sistema\\ApiAuthJWT\\obj\\",
+        "projectPath": "C:\\Users\\J\\Desktop\\Repo_foinal\\proyecto_final-\\ApiAuthJWT\\ApiAuthJWT.csproj",
+        "packagesPath": "C:\\Users\\J\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\J\\Desktop\\Repo_foinal\\proyecto_final-\\ApiAuthJWT\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\alexh\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config"
+          "C:\\Users\\J\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
@@ -96,7 +92,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
