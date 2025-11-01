@@ -1,0 +1,154 @@
+<%@ include file="../WEB-INF/jwtFilter.jsp" %>
+<%@ include file="../includes/menu.jsp" %>
+<%@ page import="modelo.Puesto,modelo.Empleado,java.util.List" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mantenimiento de Empleados</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body { background-color: #f8f9fa; }
+        .main-content { margin-left: 250px; padding: 25px; }
+        tr:hover { background-color: #e8f4ff; cursor: pointer; }
+    </style>
+</head>
+
+<body>
+<div class="main-content">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="bi bi-people-fill"></i> Empleados</h4>
+            <button class="btn btn-success" onclick="nuevoEmpleado()">
+                <i class="bi bi-plus-circle"></i> Nuevo Empleado
+            </button>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle text-center" id="tablaEmpleados">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Código</th>
+                            <th>Nombres</th>
+                            <th>Apellidos</th>
+                            <th>Dirección</th>
+                            <th>Teléfono</th>
+                            <th>Fecha Nac.</th>
+                            <th>Puesto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <%
+                            Empleado e = new Empleado();
+                            List<Empleado> lista = e.leer();
+                            for (Empleado emp : lista) {
+                        %>
+                        <tr onclick="editarEmpleado(this)"
+                            data-id="<%= emp.getId_empleado() %>"
+                            data-codigo="<%= emp.getCodigo() %>"
+                            data-nombres="<%= emp.getNombres() %>"
+                            data-apellidos="<%= emp.getApellidos() %>"
+                            data-direccion="<%= emp.getDireccion() %>"
+                            data-telefono="<%= emp.getTelefono() %>"
+                            data-fn="<%= emp.getFecha_nacimiento() %>"
+                            data-puesto="<%= emp.getId_puesto() %>">
+                            <td><%= emp.getId_empleado() %></td>
+                            <td><%= emp.getCodigo() %></td>
+                            <td><%= emp.getNombres() %></td>
+                            <td><%= emp.getApellidos() %></td>
+                            <td><%= emp.getDireccion() %></td>
+                            <td><%= emp.getTelefono() %></td>
+                            <td><%= emp.getFecha_nacimiento() %></td>
+                            <td><%= emp.getPuesto() %></td>
+                        </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 🧾 MODAL -->
+<div class="modal fade" id="modalEmpleado" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <form action="../sr_empleado" method="post" id="formEmpleado">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="tituloModal"><i class="bi bi-person-fill-add"></i> Nuevo Empleado</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" name="id_empleado" id="id_empleado">
+
+                    <div class="row g-3">
+                        <div class="col-md-4"><input type="text" name="txt_codigo" id="txt_codigo" class="form-control" placeholder="Código" required></div>
+                        <div class="col-md-4"><input type="text" name="txt_nombres" id="txt_nombres" class="form-control" placeholder="Nombres" required></div>
+                        <div class="col-md-4"><input type="text" name="txt_apellidos" id="txt_apellidos" class="form-control" placeholder="Apellidos" required></div>
+                        <div class="col-md-6"><input type="text" name="txt_direccion" id="txt_direccion" class="form-control" placeholder="Dirección" required></div>
+                        <div class="col-md-3"><input type="text" name="txt_telefono" id="txt_telefono" class="form-control" placeholder="Teléfono" required></div>
+                        <div class="col-md-3"><input type="date" name="txt_fn" id="txt_fn" class="form-control" required></div>
+                        <div class="col-md-6">
+                            <select name="drop_puesto" id="drop_puesto" class="form-select" required>
+                                <option value="">Seleccione un puesto</option>
+                                <%
+                                    Puesto p = new Puesto();
+                                    List<Puesto> puestos = p.leer();
+                                    for (Puesto item : puestos) {
+                                %>
+                                    <option value="<%= item.getId_puesto() %>"><%= item.getPuesto() %></option>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" name="btn" value="Agregar" id="btnGuardar" class="btn btn-primary">💾 Guardar</button>
+                    <button type="submit" name="btn" value="Actualizar" id="btnActualizar" class="btn btn-warning d-none">🔄 Actualizar</button>
+                    <button type="submit" name="btn" value="Eliminar" id="btnEliminar" class="btn btn-danger d-none" onclick="return confirm('¿Eliminar este empleado?')">🗑️ Eliminar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const modalEmpleado = new bootstrap.Modal(document.getElementById('modalEmpleado'));
+
+// Nuevo
+function nuevoEmpleado(){
+    $("#tituloModal").text("Nuevo Empleado");
+    $("#formEmpleado")[0].reset();
+    $("#id_empleado").val("");
+    $("#btnGuardar").removeClass("d-none");
+    $("#btnActualizar, #btnEliminar").addClass("d-none");
+    modalEmpleado.show();
+}
+
+// Editar
+function editarEmpleado(fila){
+    $("#tituloModal").text("Editar Empleado");
+    $("#id_empleado").val(fila.dataset.id);
+    $("#txt_codigo").val(fila.dataset.codigo);
+    $("#txt_nombres").val(fila.dataset.nombres);
+    $("#txt_apellidos").val(fila.dataset.apellidos);
+    $("#txt_direccion").val(fila.dataset.direccion);
+    $("#txt_telefono").val(fila.dataset.telefono);
+    $("#txt_fn").val(fila.dataset.fn);
+    $("#drop_puesto").val(fila.dataset.puesto);
+    $("#btnGuardar").addClass("d-none");
+    $("#btnActualizar, #btnEliminar").removeClass("d-none");
+    modalEmpleado.show();
+}
+</script>
+</body>
+</html>
